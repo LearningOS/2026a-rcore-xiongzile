@@ -47,6 +47,9 @@ pub struct TaskManagerInner {
     current_task: usize,
 }
 
+/// record called syscalls
+pub static mut TRACED_SYSCALLS: [[usize; 512]; 256] = [[0; 512]; 256];
+
 lazy_static! {
     /// Global variable: TASK_MANAGER
     pub static ref TASK_MANAGER: TaskManager = {
@@ -72,6 +75,11 @@ lazy_static! {
 }
 
 impl TaskManager {
+    // return the task id
+    fn cur_task(&self) -> usize {
+        let inner = self.inner.exclusive_access();
+        inner.current_task
+    }
     /// Run the first task in task list.
     ///
     /// Generally, the first task in task list is an idle task (we call it zero process later).
@@ -140,6 +148,11 @@ impl TaskManager {
 /// Run the first task in task list.
 pub fn run_first_task() {
     TASK_MANAGER.run_first_task();
+}
+
+/// return the task id
+pub fn cur_task() -> usize {
+    TASK_MANAGER.cur_task()
 }
 
 /// Switch current `Running` task to the task we have found,
